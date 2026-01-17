@@ -1,0 +1,36 @@
+🕵️‍♂️ Rogue-Investigator: The Pythonic ECS Template
+
+This project serves as a "Gold Master" template for grid-based Roguelikes. It is built using Python 3.10+, tcod, and tcod-ecs. It emphasizes a clean separation of concerns and a data-driven architecture.
+🛠 Project Architecture
+
+This template follows the Entity Component System (ECS) paradigm, favoring Composition over Inheritance.
+
+    main.py: The entry point. Initializes the root console and manages the core game loop.
+
+    game/states.py: The "Brain" of the operation. Handles input logic, collision detection, and state transitions using a State Machine pattern.
+
+    game/world_tools.py: The "Map Bureau." Contains logic for procedural generation, boundary math, and entity spawning.
+
+    game/components.py: The "Data Schema." Defines what an entity is and has (Position, Graphic, Gold, etc.).
+
+    game/state_tools.py: Visual utilities, including the "Screen Dimmer" for menu transitions.
+
+🚀 Key Features
+
+    Collision Physics: Entities with the "Solid" tag act as physical barriers.
+
+    Dynamic Inventory: Automatic gold pickup and real-time total tracking.
+
+    Debug Overlay: Mouse-over coordinate tracking (printed to console) for forensic spatial testing.
+
+    Scalable Map Logic: Easy-to-adjust x_min/max variables for custom room sizes.
+
+🚦 How to Use
+
+    Clone the Template: Use this folder as the root for any new Roguelike.
+
+    Define Components: Add new data types in components.py.
+
+    Expand the World: Modify world_tools.py to create new room shapes or dungeon floors.
+
+    Add Mechanics: Nest new interaction logic inside the on_event match statements in states.py.
