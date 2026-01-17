@@ -2,11 +2,20 @@
 
 from __future__ import annotations
 
+import tcod.console
 import tcod.context
 import tcod.ecs
+
+import game.state
 
 context: tcod.context.Context
 """The window managed by tcod."""
 
 world: tcod.ecs.Registry
 """The active ECS registry and current session."""
+
+states: list[game.state.State] = []
+"""A stack of states with the last item being the the active state."""
+
+console: tcod.console.Console
+"""The current main console."""

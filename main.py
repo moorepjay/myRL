@@ -4,34 +4,13 @@ import tcod.console
 import tcod.event
 import tcod.context
 import tcod.tileset
-import attrs
 
+import game.states
+import game.world_tools
+import game.state_tools
 import g
+from game.constants import SCREEN_WIDTH, SCREEN_HEIGHT
 
-@attrs.define()
-class ExampleState:
-    """Example with hard-coded player position."""
-
-    player_x: int
-    player_y: int
-
-    def on_draw(self, console: tcod.console.Console) -> None:
-        """Draw player."""
-        console.print(self.player_x, self.player_y, "@")
-
-    def on_event(self, event: tcod.event.Event) -> None:
-        """Move the player on events and handle exiting. Movement is hard-coded"""
-        match event:
-            case tcod.event.Quit():
-                raise SystemExit
-            case tcod.event.KeyDown(sym=tcod.event.KeySym.LEFT):
-                self.player_x -= 1
-            case tcod.event.KeyDown(sym=tcod.event.KeySym.RIGHT):
-                self.player_x += 1
-            case tcod.event.KeyDown(sym=tcod.event.KeySym.DOWN):
-                self.player_y += 1
-            case tcod.event.KeyDown(sym=tcod.event.KeySym.UP):
-                self.player_y -= 1
 
 
 def main() -> None:
@@ -40,18 +19,15 @@ def main() -> None:
         "src/data/Alloy_curses_12x12.png", columns=16, rows=16, charmap=tcod.tileset.CHARMAP_CP437
     )
     tcod.tileset.procedural_block_elements(tileset=tileset)
-    console = tcod.console.Console(80, 50)
-    state = ExampleState(player_x=console.width // 2, player_y=console.height // 2)
-    with tcod.context.new(console=console, tileset=tileset) as g.context:
-        while True:
-            console.clear()
-            state.on_draw(console)
-            g.context.present(console)
-            for event in tcod.event.wait():
-                print(event)
-                if isinstance(event, tcod.event.Quit):
-                    raise SystemExit
-                state.on_event(event)
+    g.console = tcod.console.Console(SCREEN_WIDTH, SCREEN_HEIGHT)
+    g.states = [game.states.MainMenu()]
+    with tcod.context.new(
+        console=g.console,
+        tileset=tileset,
+        sdl_window_flags=tcod.context.SDL_WINDOW_RESIZABLE | tcod.context.SDL_WINDOW_MAXIMIZED
+    ) as g.context:
+        game.state_tools.main_loop()
+
 
 if __name__ == "__main__":
     main()
