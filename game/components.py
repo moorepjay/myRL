@@ -2,6 +2,7 @@ import attrs
 import tcod.ecs.callbacks
 from tcod.ecs import Entity
 from typing import Final, Self
+from dataclasses import dataclass
 
 @attrs.define(frozen=True)
 class Position:
@@ -36,6 +37,16 @@ def on_position_changed(entity: Entity, old: Position | None, new: Position | No
         # Add new position to tags
         entity.tags.add(new)
 
-
 Gold: Final = ("Gold", int)
 """Amount of gold"""
+
+@dataclass(frozen=True)
+class IsMonster:
+    pass
+
+@dataclass(frozen=True)
+class Fighter:
+    hp: int
+    max_hp: int
+    power: int
+    defense: int

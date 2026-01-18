@@ -1,6 +1,8 @@
 🕵️‍♂️ Rogue-Investigator: The Pythonic ECS Template
 
 This project serves as a "Gold Master" template for grid-based Roguelikes. It is built using Python 3.10+, tcod, and tcod-ecs. It emphasizes a clean separation of concerns and a data-driven architecture.
+
+
 🛠 Project Architecture
 
 This template follows the Entity Component System (ECS) paradigm, favoring Composition over Inheritance.

@@ -3,11 +3,11 @@ from __future__ import annotations
 import attrs
 import tcod.console
 import tcod.event
+import time
 
 
 import g
-from game.components import Gold, Graphic, Position
-from game.constants import DIRECTION_KEYS
+from game.components import Gold, Graphic, Position, Fighter, IsMonster
 from game.tags import IsItem, IsPlayer
 from .menu import ListMenu, SelectItem
 from .world_tools import new_world
@@ -57,18 +57,34 @@ class MainMenu(ListMenu):
 @attrs.define()
 class InGame(State):
     """Primary in-game state."""
+    last_move_time: float = 0.0
+    move_delay: float = 0.12
+
     def on_event(self, event: tcod.event.Event) -> StateResult:
         """Move the player on events and handle exiting."""
         (player,) = g.world.Q.all_of(tags=[IsPlayer])
         match event:
             case tcod.event.Quit():
                 raise SystemExit
-            case tcod.event.KeyDown(sym=sym) if sym in DIRECTION_KEYS:
 
-                # Gaurd check for being in bounds
+            case tcod.event.KeyDown(sym=sym) if sym in DIRECTION_KEYS:
+                current_time = time.time()
+                if current_time - self.last_move_time < self.move_delay:
+                    return None
+
                 target_pos = player.components[Position] + DIRECTION_KEYS[sym]
-                if not g.world.Q.all_of(tags=[target_pos, "Solid"]):
+
+                target_entities = list(g.world.Q.all_of(components=[Fighter], tags=[target_pos]))
+
+                if target_entities:
+                    target = target_entities[0]
+                    self.resolve_combat(player, target)
+                    self.last_move_time = current_time
+
+                elif not g.world.Q.all_of(tags=[target_pos, "Solid"]):
                     player.components[Position] = target_pos
+                    self.last_move_time = current_time
+
                     # Auto pickup gold
                     for gold in g.world.Q.all_of(components=[Gold], tags=[player.components[Position], IsItem]):
                         player.components[Gold] += gold.components[Gold]
@@ -84,9 +100,6 @@ class InGame(State):
             case tcod.event.MouseMotion(tile=(x, y)):
                 # This prints the current 'Ordered Pair' to your terminal
                 print(f"Mouse at Coordinate: ({x}, {y})")
-                return None
-
-
                 return None
             case tcod.event.KeyDown(sym=KeySym.ESCAPE):
                 return Push(MainMenu())
@@ -106,4 +119,43 @@ class InGame(State):
         if text := g.world[None].components.get(("Text", str)):
             console.print(x=0, y=console.height -1, text=text, fg=(255,255,255), bg=(0, 0, 0))
 
+        # Draw coordinate compass
+        (player,) = g.world.Q.all_of(tags=[IsPlayer])
+        pos = player.components[Position]
+
+        compass_text = f"Location: ({pos.x}, {pos.y})"
+        x_pos = console.width - len(compass_text)
+
+        console.print(
+            x=x_pos,
+            y=console.height - 1,
+            text=compass_text,
+            fg=(255, 255, 255),
+            bg=(50, 50, 50)
+        )
+
+    def resolve_combat(self, attacker: tcod.ecs.Entity, defender: tcod.ecs.Entity) -> None:
+        """Handle a combat exchange between two entities."""
+        a_stats = attacker.components[Fighter]
+        d_stats = defender.components[Fighter]
+
+        # Damage = Power - Defense (Min 0)
+        damage = max(0, a_stats.power - d_stats.defense)
+        new_hp = d_stats.hp - damage
+
+        # Update defender stats (replacing the frozen dataclass)
+        defender.components[Fighter] = Fighter(
+            hp=new_hp,
+            max_hp=d_stats.max_hp,
+            power=d_stats.power,
+            defense=d_stats.defense
+        )
+
+        # Log to the on-screen message bar
+        name = "Monster" if IsMonster in defender.tags else "Something"
+        if new_hp <= 0:
+            g.world[None].components[("Text", str)] = f"You kill the {name}!"
+            defender.clear() # Forensic cleanup: entity is removed from the world
+        else:
+            g.world[None].components[("Text", str)] = f"You hit the {name} for {damage} HP."
 
