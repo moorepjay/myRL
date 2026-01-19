@@ -54,9 +54,11 @@ class MainMenu(ListMenu):
         """Close the program."""
         raise SystemExit
 
+
 @attrs.define()
 class InGame(State):
     """Primary in-game state."""
+
     last_move_time: float = 0.0
     move_delay: float = 0.12
 
@@ -73,12 +75,34 @@ class InGame(State):
                     return None
 
                 target_pos = player.components[Position] + DIRECTION_KEYS[sym]
+                print(f"Trying to move to: {target_pos}")
 
-                target_entities = list(g.world.Q.all_of(components=[Fighter], tags=[target_pos]))
+                target_entities = list(
+                    g.world.Q.all_of(components=[Fighter], tags=[target_pos])
+                )
+                print(f"Entities at target: {len(target_entities)}")
 
+                solid_check = list(g.world.Q.all_of(tags=[target_pos, "Solid"]))
+                print(f"Solid entities at target: {len(solid_check)}")  # Add this
                 if target_entities:
                     target = target_entities[0]
                     self.resolve_combat(player, target)
+
+                    player_message = g.world[None].components.get(("Text", str), "")
+
+                    if (
+                        target.components.get(Fighter)
+                        and target.components[Fighter].hp > 0
+                    ):
+                        self.resolve_combat(target, player)
+
+                        monster_message = g.world[None].components.get(
+                            ("Text", str), ""
+                        )
+
+                        combined = f"{player_message} {monster_message}"
+                        g.world[None].components[("Text", str)] = combined
+
                     self.last_move_time = current_time
 
                 elif not g.world.Q.all_of(tags=[target_pos, "Solid"]):
@@ -86,13 +110,17 @@ class InGame(State):
                     self.last_move_time = current_time
 
                     # Auto pickup gold
-                    for gold in g.world.Q.all_of(components=[Gold], tags=[player.components[Position], IsItem]):
+                    for gold in g.world.Q.all_of(
+                        components=[Gold], tags=[player.components[Position], IsItem]
+                    ):
                         player.components[Gold] += gold.components[Gold]
                         text = f"Picked up {gold.components[Gold]}g, total: {player.components[Gold]}g"
                         g.world[None].components[("Text", str)] = text
                         gold.clear()
                 else:
-                    g.world[None].components[("Text", str)] = "This is definitely a solid object."
+                    g.world[None].components[("Text", str)] = (
+                        "This is definitely a solid object."
+                    )
 
                 return None
 
@@ -108,6 +136,11 @@ class InGame(State):
 
     def on_draw(self, console: tcod.console.Console) -> None:
         """Draw entities."""
+
+        (player,) = g.world.Q.all_of(tags=[IsPlayer])
+        pos = player.components[Position]
+        print(f"Player position: {pos.x}, {pos.y}")
+
         for entity in g.world.Q.all_of(components=[Position, Graphic]):
             pos = entity.components[Position]
             # Guard against out of bounds positions
@@ -117,7 +150,9 @@ class InGame(State):
             console.rgb[["ch", "fg"]][pos.y, pos.x] = graphic.ch, graphic.fg
 
         if text := g.world[None].components.get(("Text", str)):
-            console.print(x=0, y=console.height -1, text=text, fg=(255,255,255), bg=(0, 0, 0))
+            console.print(
+                x=0, y=console.height - 1, text=text, fg=(255, 255, 255), bg=(0, 0, 0)
+            )
 
         # Draw coordinate compass
         (player,) = g.world.Q.all_of(tags=[IsPlayer])
@@ -131,10 +166,12 @@ class InGame(State):
             y=console.height - 1,
             text=compass_text,
             fg=(255, 255, 255),
-            bg=(50, 50, 50)
+            bg=(50, 50, 50),
         )
 
-    def resolve_combat(self, attacker: tcod.ecs.Entity, defender: tcod.ecs.Entity) -> None:
+    def resolve_combat(
+        self, attacker: tcod.ecs.Entity, defender: tcod.ecs.Entity
+    ) -> None:
         """Handle a combat exchange between two entities."""
         a_stats = attacker.components[Fighter]
         d_stats = defender.components[Fighter]
@@ -148,14 +185,30 @@ class InGame(State):
             hp=new_hp,
             max_hp=d_stats.max_hp,
             power=d_stats.power,
-            defense=d_stats.defense
+            defense=d_stats.defense,
         )
 
-        # Log to the on-screen message bar
-        name = "Monster" if IsMonster in defender.tags else "Something"
-        if new_hp <= 0:
-            g.world[None].components[("Text", str)] = f"You kill the {name}!"
-            defender.clear() # Forensic cleanup: entity is removed from the world
+        if IsPlayer in attacker.tags:
+            # Player attacking something
+            name = "Monster" if IsMonster in defender.tags else "Something"
         else:
-            g.world[None].components[("Text", str)] = f"You hit the {name} for {damage} HP."
+            # Something attacking player
+            name = "Monster" if IsMonster in attacker.tags else "Something"
 
+        # Log to the on-screen message bar
+        if IsPlayer in attacker.tags:
+            if new_hp <= 0:
+                message = f"You kill the {name}!"
+            else:
+                message = f"You hit the {name} for {damage} HP."
+        else:
+            # Something is attacking the player
+            if new_hp <= 0:
+                message = "YOU HAVE BEEN SLAIN!"
+            else:
+                message = f"{name} strikes you for {damage}!"
+
+        g.world[None].components[("Text", str)] = message
+
+        if new_hp <= 0:
+            defender.clear()

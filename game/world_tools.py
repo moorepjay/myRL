@@ -1,11 +1,12 @@
 """Functions for working with worlds."""
 
 from __future__ import annotations
-from random import Random
+import random
 from tcod.ecs import Registry, Entity
 from game.components import Gold, Graphic, Position, Fighter, IsMonster
 from game.tags import IsActor, IsItem, IsPlayer
 from .map_gen import generate_dungeon
+
 
 # Registry "contains world and how it will be used"
 def new_world(width: int, height: int) -> Registry:
@@ -24,7 +25,20 @@ def new_world(width: int, height: int) -> Registry:
     player_x, player_y = rooms[0].center
     spawn_player(world, player_x, player_y)
 
+    for i in range(10):
+        random_room = random.choice(rooms[1:])
+        monster_x = random.randint(random_room.x1, random_room.x2 - 1)
+        monster_y = random.randint(random_room.y1, random_room.y2 - 1)
+        spawn_monster(world, monster_x, monster_y)
+
+    for i in range(15):
+        random_room = random.choice(rooms[1:])
+        gold_x = random.randint(random_room.x1, random_room.x2 - 1)
+        gold_y = random.randint(random_room.y1, random_room.y2 - 1)
+        spawn_gold(world, gold_x, gold_y)
+
     return world
+
 
 def spawn_player(world: Registry, x: int, y: int) -> Entity:
     player = world[object()]
@@ -35,13 +49,15 @@ def spawn_player(world: Registry, x: int, y: int) -> Entity:
     player.tags.add(IsPlayer)
     return player
 
+
 def spawn_gold(world: Registry, x: int, y: int) -> Entity:
     gold = world[object()]
     gold.components[Position] = Position(x, y)
     gold.components[Graphic] = Graphic(ord("$"), fg=(255, 255, 0))
-    gold.components[Gold] = 5 # Or a random amount
+    gold.components[Gold] = 5  # Or a random amount
     gold.tags.add(IsItem)
     return gold
+
 
 def spawn_monster(world: Registry, x: int, y: int):
     monster = world[object()]
@@ -55,4 +71,3 @@ def spawn_monster(world: Registry, x: int, y: int):
     monster.tags.add(IsMonster)
     monster.tags.add("Solid")
     return monster
-

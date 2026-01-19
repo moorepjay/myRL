@@ -23,7 +23,9 @@ class MenuItem(Protocol):
     def on_event(self, event: tcod.event.Event) -> StateResult:
         """Handle events passed to the menu item."""
 
-    def on_draw(self, console: tcod.console.Console, x: int, y: int, highlight: bool) -> None:
+    def on_draw(
+        self, console: tcod.console.Console, x: int, y: int, highlight: bool
+    ) -> None:
         """Draw is item at the given position."""
 
 
@@ -37,16 +39,28 @@ class SelectItem(MenuItem):
     def on_event(self, event: tcod.event.Event) -> StateResult:
         """Handle events selecting this item."""
         match event:
-            case tcod.event.KeyDown(sym=sym) if sym in {KeySym.RETURN, KeySym.RETURN2, KeySym.KP_ENTER}:
+            case tcod.event.KeyDown(sym=sym) if sym in {
+                KeySym.RETURN,
+                KeySym.RETURN2,
+                KeySym.KP_ENTER,
+            }:
                 return self.callback()
             case tcod.event.MouseButtonUp(button=tcod.event.MouseButton.LEFT):
                 return self.callback()
             case _:
                 return None
 
-    def on_draw(self, console: tcod.console.Console, x: int, y: int, highlight: bool) -> None:
+    def on_draw(
+        self, console: tcod.console.Console, x: int, y: int, highlight: bool
+    ) -> None:
         """Render this items label."""
-        console.print(x, y, self.label, fg=(255, 255, 255), bg=(64, 64, 64) if highlight else (0, 0, 0))
+        console.print(
+            x,
+            y,
+            self.label,
+            fg=(255, 255, 255),
+            bg=(64, 64, 64) if highlight else (0, 0, 0),
+        )
 
 
 @attrs.define()

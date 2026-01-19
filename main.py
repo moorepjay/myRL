@@ -12,11 +12,13 @@ import g
 from game.constants import SCREEN_WIDTH, SCREEN_HEIGHT
 
 
-
 def main() -> None:
     """Load a tileset and open a window using it."""
     tileset = tcod.tileset.load_tilesheet(
-        "src/data/Alloy_curses_12x12.png", columns=16, rows=16, charmap=tcod.tileset.CHARMAP_CP437
+        "src/data/Alloy_curses_12x12.png",
+        columns=16,
+        rows=16,
+        charmap=tcod.tileset.CHARMAP_CP437,
     )
     tcod.tileset.procedural_block_elements(tileset=tileset)
     g.console = tcod.console.Console(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -24,7 +26,8 @@ def main() -> None:
     with tcod.context.new(
         console=g.console,
         tileset=tileset,
-        sdl_window_flags=tcod.context.SDL_WINDOW_RESIZABLE | tcod.context.SDL_WINDOW_MAXIMIZED
+        sdl_window_flags=tcod.context.SDL_WINDOW_RESIZABLE
+        | tcod.context.SDL_WINDOW_MAXIMIZED,
     ) as g.context:
         game.state_tools.main_loop()
 

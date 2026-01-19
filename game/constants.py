@@ -33,5 +33,8 @@ DIRECTION_KEYS: Final = {
 }
 
 SCREEN_WIDTH = 120
-SCREEN_HEIGHT = 60
+SCREEN_HEIGHT = 75
 
+MAP_WIDTH = 100  # Leave 20 units for the UI sidebar
+MAP_HEIGHT = 70  # Leave 5 units for the message log
+MAP_MARGIN = 1  # Guaranteed wall border

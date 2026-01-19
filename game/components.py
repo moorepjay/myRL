@@ -4,9 +4,11 @@ from tcod.ecs import Entity
 from typing import Final, Self
 from dataclasses import dataclass
 
+
 @attrs.define(frozen=True)
 class Position:
     """An entities postion."""
+
     x: int
     y: int
 
@@ -15,15 +17,20 @@ class Position:
         x, y = direction
         return self.__class__(self.x + x, self.y + y)
 
+
 @attrs.define(frozen=True)
 class Graphic:
     """An entities icon and color."""
+
     ch: int = ord("!")
     fg: tuple[int, int, int] = (255, 255, 255)
 
+
 # Decorator is "watching" components for changes
 @tcod.ecs.callbacks.register_component_changed(component=Position)
-def on_position_changed(entity: Entity, old: Position | None, new: Position | None) -> None:
+def on_position_changed(
+    entity: Entity, old: Position | None, new: Position | None
+) -> None:
     """Mirror posistion components as a tag"""
     # Position hasn't changed, ignore
     if old == new:
@@ -37,12 +44,15 @@ def on_position_changed(entity: Entity, old: Position | None, new: Position | No
         # Add new position to tags
         entity.tags.add(new)
 
+
 Gold: Final = ("Gold", int)
 """Amount of gold"""
+
 
 @dataclass(frozen=True)
 class IsMonster:
     pass
+
 
 @dataclass(frozen=True)
 class Fighter:

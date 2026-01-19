@@ -8,6 +8,7 @@ import attrs
 import tcod.console
 import tcod.event
 
+
 class State(Protocol):
     """An abstract game state."""
 
@@ -23,15 +24,19 @@ class State(Protocol):
 @attrs.define()
 class Push:
     """Push a new state on top of the stack."""
+
     state: State
+
 
 @attrs.define()
 class Pop:
     """Remove the current state from the stack."""
 
+
 @attrs.define()
 class Reset:
     """Replace the entire stack with a new state."""
+
     state: State
 
 
