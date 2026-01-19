@@ -2,37 +2,42 @@
 
 This template is built around the Entity Component System (ECS) paradigm, favoring composition over inheritance to ensure modularity and maintainability.
 
-    main.py: The application entry point. It initializes the TCOD tileset, creates the root console, and manages the primary game loop.
+main.py: The application entry point. It initializes the TCOD tileset, creates the root console, and manages the primary game loop.
 
-    game/states.py: The core logic engine. It manages the State Machine, handling input processing, collision resolution, and transitions between game screens (e.g., Main Menu to World).
+game/states.py: The core logic engine. It manages the State Machine, handling input processing, collision resolution, and transitions between game screens (e.g., Main Menu to      World).
 
-    game/world_tools.py: The world-building suite. Responsible for initializing the ECS world, procedural dungeon generation, and spawning entities.
+game/world_tools.py: The world-building suite. Responsible for initializing the ECS world, procedural dungeon generation, and spawning entities.
 
-    game/map_gen.py: Contains the spatial logic, including the Rect class and dungeon algorithms. It uses AABB Collision to ensure non-overlapping room generation.
+game/map_gen.py: Contains the spatial logic, including the Rect class and dungeon algorithms. It uses AABB Collision to ensure non-overlapping room generation.
 
-    game/components.py: The data schema. Defines the attrs-based dataclasses and tags used to store entity state (Position, Graphics, Stats).
+game/components.py: The data schema. Defines the attrs-based dataclasses and tags used to store entity state (Position, Graphics, Stats).
 
-    game/state_tools.py: Visual and helper utilities, such as screen transitions and rendering effects.
+game/state_tools.py: Visual and helper utilities, such as screen transitions and rendering effects.
+
 
 🚀 Key Features
 
-    Decoupled Viewports: Separates Screen Space (window dimensions) from World Space (map dimensions), allowing for dedicated UI regions and sidebars.
+Decoupled Viewports: Separates Screen Space (window dimensions) from World Space (map dimensions), allowing for dedicated UI regions and sidebars.
 
-    Collision System: Implements deterministic collision checks where entities with specific component tags act as physical barriers.
+Collision System: Implements deterministic collision checks where entities with specific component tags act as physical barriers.
 
-    Procedural Generation: A robust dungeon generator that handles room placement, corridor carving, and boundary validation.
+Procedural Generation: A robust dungeon generator that handles room placement, corridor carving, and boundary validation.
 
-    Data-Driven State: Leverages tcod-ecs for efficient querying of entities based on their components (e.g., finding all entities with both a Position and a Graphic).
+Data-Driven State: Leverages tcod-ecs for efficient querying of entities based on their components (e.g., finding all entities with both a Position and a Graphic).
 
-    Debug Tooling: Real-time mouse tracking to provide coordinate feedback for testing spatial logic and grid alignment.
+Debug Tooling: Real-time mouse tracking to provide coordinate feedback for testing spatial logic and grid alignment.
+
 
 🚦 Implementation Guide
+
 1. Configuration
 
 Adjust constants.py to define your MAP_WIDTH, MAP_HEIGHT, and SCREEN dimensions. This decoupling allows you to instantly resize the playable area vs. the UI area.
+
 2. Adding Components
 
 Define new data structures in components.py. Use the @attrs.define(frozen=True) pattern to maintain data immutability and prevent side effects.
+
 3. Modifying Logic
 
 All interaction logic (Combat, Movement, Items) is contained within the on_event match statements in states.py. This centralizes "how" the game reacts to user input.
