@@ -1,38 +1,38 @@
-🕵️‍♂️ Rogue-Investigator: The Pythonic ECS Template
-
-This project serves as a "Gold Master" template for grid-based Roguelikes. It is built using Python 3.10+, tcod, and tcod-ecs. It emphasizes a clean separation of concerns and a data-driven architecture.
-
-
 🛠 Project Architecture
 
-This template follows the Entity Component System (ECS) paradigm, favoring Composition over Inheritance.
+This template is built around the Entity Component System (ECS) paradigm, favoring composition over inheritance to ensure modularity and maintainability.
 
-    main.py: The entry point. Initializes the root console and manages the core game loop.
+    main.py: The application entry point. It initializes the TCOD tileset, creates the root console, and manages the primary game loop.
 
-    game/states.py: The "Brain" of the operation. Handles input logic, collision detection, and state transitions using a State Machine pattern.
+    game/states.py: The core logic engine. It manages the State Machine, handling input processing, collision resolution, and transitions between game screens (e.g., Main Menu to World).
 
-    game/world_tools.py: The "Map Bureau." Contains logic for procedural generation, boundary math, and entity spawning.
+    game/world_tools.py: The world-building suite. Responsible for initializing the ECS world, procedural dungeon generation, and spawning entities.
 
-    game/components.py: The "Data Schema." Defines what an entity is and has (Position, Graphic, Gold, etc.).
+    game/map_gen.py: Contains the spatial logic, including the Rect class and dungeon algorithms. It uses AABB Collision to ensure non-overlapping room generation.
 
-    game/state_tools.py: Visual utilities, including the "Screen Dimmer" for menu transitions.
+    game/components.py: The data schema. Defines the attrs-based dataclasses and tags used to store entity state (Position, Graphics, Stats).
+
+    game/state_tools.py: Visual and helper utilities, such as screen transitions and rendering effects.
 
 🚀 Key Features
 
-    Collision Physics: Entities with the "Solid" tag act as physical barriers.
+    Decoupled Viewports: Separates Screen Space (window dimensions) from World Space (map dimensions), allowing for dedicated UI regions and sidebars.
 
-    Dynamic Inventory: Automatic gold pickup and real-time total tracking.
+    Collision System: Implements deterministic collision checks where entities with specific component tags act as physical barriers.
 
-    Debug Overlay: Mouse-over coordinate tracking (printed to console) for forensic spatial testing.
+    Procedural Generation: A robust dungeon generator that handles room placement, corridor carving, and boundary validation.
 
-    Scalable Map Logic: Easy-to-adjust x_min/max variables for custom room sizes.
+    Data-Driven State: Leverages tcod-ecs for efficient querying of entities based on their components (e.g., finding all entities with both a Position and a Graphic).
 
-🚦 How to Use
+    Debug Tooling: Real-time mouse tracking to provide coordinate feedback for testing spatial logic and grid alignment.
 
-    Clone the Template: Use this folder as the root for any new Roguelike.
+🚦 Implementation Guide
+1. Configuration
 
-    Define Components: Add new data types in components.py.
+Adjust constants.py to define your MAP_WIDTH, MAP_HEIGHT, and SCREEN dimensions. This decoupling allows you to instantly resize the playable area vs. the UI area.
+2. Adding Components
 
-    Expand the World: Modify world_tools.py to create new room shapes or dungeon floors.
+Define new data structures in components.py. Use the @attrs.define(frozen=True) pattern to maintain data immutability and prevent side effects.
+3. Modifying Logic
 
-    Add Mechanics: Nest new interaction logic inside the on_event match statements in states.py.
+All interaction logic (Combat, Movement, Items) is contained within the on_event match statements in states.py. This centralizes "how" the game reacts to user input.
