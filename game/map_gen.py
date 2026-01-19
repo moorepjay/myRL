@@ -1,7 +1,5 @@
 import random
 from game.constants import (
-    SCREEN_HEIGHT,
-    SCREEN_WIDTH,
     MAP_MARGIN,
     MAP_HEIGHT,
     MAP_WIDTH,
@@ -33,8 +31,7 @@ class Rect:
     def from_dimensions(cls, x: int, y: int, w: int, h: int) -> "Rect":
         return cls(x1=x, y1=y, x2=x + w, y2=y + h)
 
-    # Implement Midoint formula to find center. I don't know why its @property and not just a
-    # function.
+    # Implement Midoint formula to find center.
     @property
     def center(self) -> tuple[int, int]:
         center_x = (self.x1 + self.x2) // 2
