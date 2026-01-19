@@ -13,7 +13,9 @@ ENV/
 dist/
 build/
 *.egg-info/
-myRL_bundle.zip
+map_test.py
+scratch.py
+# myRL_bundle.zip
 
 # Unit test / coverage reports
 .pytest_cache/

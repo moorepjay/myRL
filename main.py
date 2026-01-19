@@ -14,7 +14,7 @@ from game.constants import SCREEN_WIDTH, SCREEN_HEIGHT
 
 
 def main() -> None:
-    """Load a tileset and open a window using it, it will close immediately."""
+    """Load a tileset and open a window using it."""
     tileset = tcod.tileset.load_tilesheet(
         "src/data/Alloy_curses_12x12.png", columns=16, rows=16, charmap=tcod.tileset.CHARMAP_CP437
     )

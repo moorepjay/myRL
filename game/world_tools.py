@@ -5,39 +5,24 @@ from random import Random
 from tcod.ecs import Registry, Entity
 from game.components import Gold, Graphic, Position, Fighter, IsMonster
 from game.tags import IsActor, IsItem, IsPlayer
+from .map_gen import generate_dungeon
 
 # Registry "contains world and how it will be used"
 def new_world(width: int, height: int) -> Registry:
     world = Registry()
 
-    x_min, x_max = 1, width - 2
-    y_min, y_max = 1, height - 5
+    grid, rooms = generate_dungeon()
 
-    # Create perimeter wall
-    for x in range(x_min, x_max + 1):
-        for y in range(y_min, y_max + 1):
-            if x == x_min or x == x_max or y == y_min or y == y_max:
+    for y in range(len(grid)):
+        for x in range(len(grid[0])):
+            if grid[y][x] == "#":
                 wall = world[object()]
                 wall.components[Position] = Position(x, y)
                 wall.components[Graphic] = Graphic(ord("#"), fg=(120, 120, 120))
                 wall.tags.add("Solid")
 
-    # Create one unique random number generator for the world
-    rng = world[None].components[Random] = Random()
-
-    # Create player
-    spawn_player(world, width // 2, height // 2)
-
-    # Scatter gold around the world randomly
-    for _ in range(20):
-        gold = world[object()]
-        # Subtract 1 because randint() is inclusive and grid is zero-indexed
-        x = rng.randint(x_min + 1, x_max - 1)
-        y = rng.randint(y_min + 1, y_max - 1)
-        spawn_gold(world, x, y)
-
-    # Create monster
-    spawn_monster(world, 15, 15)
+    player_x, player_y = rooms[0].center
+    spawn_player(world, player_x, player_y)
 
     return world
 

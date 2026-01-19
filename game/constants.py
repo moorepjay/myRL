@@ -32,5 +32,6 @@ DIRECTION_KEYS: Final = {
     KeySym.n: (1, 1),
 }
 
-SCREEN_WIDTH = 100
+SCREEN_WIDTH = 120
 SCREEN_HEIGHT = 60
+
